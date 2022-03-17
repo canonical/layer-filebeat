@@ -91,6 +91,22 @@ To monitor additional applications, simply relate the filebeat subordinate:
 
     juju add-relation filebeat:beats-host my-charm
 
+
+## Build and publish new versions
+
+This charm uses the reactive framework. `charm build` is used to build a deployable charm.
+
+In order to publish new versions of the charm, the following commands need to be run:
+
+```
+charm build
+cd /tmp/charm-builds/filebeat
+charmcraft pack
+charmcraft upload filebeat_ubuntu-20.04-amd64_ubuntu-18.04-amd64_ubuntu-16.04-amd64.charm
+charmcraft release filebeat --revision=34 --channel=edge
+charmcraft status filebeat
+```
+
 ## Contact Information
 
 - <elasticsearch-charmers@lists.launchpad.net>

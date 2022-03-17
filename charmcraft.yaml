@@ -1,0 +1,38 @@
+type: charm
+
+parts:
+  charm:
+    plugin: dump
+    source: .
+    prime:
+      - actions/*
+      - actions.yaml
+      - bin/*
+      - config.yaml
+      - copyright
+      - hooks/*
+      - icon.svg
+      - lib/*
+      - LICENSE
+      - metadata.yaml
+      - reactive/*
+      - README.md
+      - templates/*
+      - wheelhouse/*
+      - wheelhouse.txt
+
+bases:
+    - build-on:
+        - name: ubuntu
+          channel: "20.04"
+          architectures: ["amd64"]
+      run-on:
+        - name: ubuntu
+          channel: "20.04"
+          architectures: ["amd64"]
+        - name: ubuntu
+          channel: "18.04"
+          architectures: ["amd64"]
+        - name: ubuntu
+          channel: "16.04"
+          architectures: ["amd64"]
