@@ -1,7 +1,6 @@
 # WARNING! This file is managed by Juju. Edits will not persist.
 # Edit at your own risk
 filebeat:
-  registry_file: /var/lib/filebeat/registry
   inputs:
     - type: log
       paths:
