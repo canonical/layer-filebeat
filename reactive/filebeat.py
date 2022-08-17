@@ -6,7 +6,6 @@ from charms.reactive import set_state
 from charms.reactive import remove_state
 from charms.reactive import hook
 from charms.reactive.helpers import data_changed
-from charms.templating.jinja2 import render
 
 from charmhelpers.core import unitdata
 from charmhelpers.core.hookenv import config, log
@@ -108,13 +107,13 @@ def manage_filebeat_logstash_ssl():
         key = base64.b64decode(logstash_ssl_key).decode('utf8')
 
         if data_changed('logstash_cert', cert):
-            render(template='{{ data }}',
-                   context={'data': cert},
-                   target=LOGSTASH_SSL_CERT, perms=0o444)
+            with open(LOGSTASH_SSL_CERT, "w") as cert_file:
+                cert_file.write(cert)
+            os.chmod(LOGSTASH_SSL_CERT, 0o444)
         if data_changed('logstash_key', key):
-            render(template='{{ data }}',
-                   context={'data': key},
-                   target=LOGSTASH_SSL_KEY, perms=0o400)
+            with open(LOGSTASH_SSL_KEY, "w") as key_file:
+                key_file.write(key)
+            os.chmod(LOGSTASH_SSL_KEY, 0o400)
     else:
         if not logstash_ssl_cert and os.path.exists(LOGSTASH_SSL_CERT):
             os.remove(LOGSTASH_SSL_CERT)

@@ -133,3 +133,9 @@ output:
 {% if juju_principal_unit -%}
 name: {{ juju_principal_unit }}
 {%- endif %}
+seccomp:
+  default_action: errno
+  syscalls:
+    - action: allow
+      names:
+        - clone3
