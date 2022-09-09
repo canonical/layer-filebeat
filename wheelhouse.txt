@@ -1,0 +1,3 @@
+# Include python requirements here
+# Xenial & py35 support - https://github.com/juju-solutions/layer-basic/pull/197
+MarkupSafe<2.0.0
