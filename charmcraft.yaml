@@ -10,7 +10,10 @@ parts:
   charm:
     source: ./
     plugin: reactive
-    build-snaps: [ charm ]
+    build-snaps: 
+      # if it is build with charm/3.x it cannot be installed on bionic
+      # Error: pip requires Python '>=3.7' but the running Python is 3.6.9    
+      - charm/2.x/stable
 
 bases:
   - build-on:
