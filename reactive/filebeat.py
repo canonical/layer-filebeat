@@ -4,6 +4,7 @@ from charms.reactive import (
     hook,
     is_state,
     when,
+    when_any,
     when_not,
     set_state,
     remove_state
@@ -51,9 +52,11 @@ def blocked_until_reinstall():
         status.blocked(msg)
 
 
-@when('beat.render')
-@when('apt.installed.filebeat')
-@when('certificates.available')
+@when_any(
+    'beat.render',
+    'apt.installed.filebeat',
+    'certificates.available'
+)
 @restart_on_change({
     LOGSTASH_SSL_CERT: ['filebeat'],
     LOGSTASH_SSL_KEY: ['filebeat'],
@@ -88,7 +91,6 @@ def render_filebeat_template():
     # Ensure ssl files match config each time we render a new template
     manage_filebeat_logstash_ssl()
     remove_state('beat.render')
-
     if connections:
         if cfg_original_hash != cfg_new_hash:
             service('restart', 'filebeat')
