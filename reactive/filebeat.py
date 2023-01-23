@@ -54,34 +54,10 @@ def blocked_until_reinstall():
 
 @when("beat.render")
 @when("apt.installed.filebeat")
-@restart_on_change(
-    {
-        LOGSTASH_SSL_CERT: ["filebeat"],
-        LOGSTASH_SSL_KEY: ["filebeat"],
-    }
-)
-def render_filebeat_template_wrapper():
-    """Render filebeat.yaml when no certificates are used."""
-    if is_state("certificates.available"):
-        return
-
-    render_filebeat_template()
-
-
-@when("beat.render")
-@when("apt.installed.filebeat")
-@when("certificates.available")
-@restart_on_change(
-    {
-        LOGSTASH_SSL_CERT: ["filebeat"],
-        LOGSTASH_SSL_KEY: ["filebeat"],
-    }
-)
-def render_filebeat_template_wrapper_ssl():
-    """Render filebeat.yaml when certificates are used."""
-    render_filebeat_template()
-
-
+@restart_on_change({
+    LOGSTASH_SSL_CERT: ['filebeat'],
+    LOGSTASH_SSL_KEY: ['filebeat'],
+    })
 def render_filebeat_template():
     """Create the filebeat.yaml config file.
 
