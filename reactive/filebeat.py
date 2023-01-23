@@ -52,11 +52,8 @@ def blocked_until_reinstall():
         status.blocked(msg)
 
 
-@when_any(
-    'beat.render',
-    'apt.installed.filebeat',
-    'certificates.available'
-)
+@when("beat.render")
+@when("apt.installed.filebeat")
 @restart_on_change({
     LOGSTASH_SSL_CERT: ['filebeat'],
     LOGSTASH_SSL_KEY: ['filebeat'],
