@@ -16,6 +16,9 @@ filebeat:
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
+      {% if extra_configs_default_input -%}
+      {{ extra_configs_default_input|indent(6) }}
+      {% endif -%}
       fields:
         juju_model_name: {{ juju_model_name }}
         juju_model_uuid: {{ juju_model_uuid }}

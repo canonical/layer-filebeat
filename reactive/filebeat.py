@@ -1,4 +1,4 @@
-import charms.apt
+from charms.apt import get_package_version, purge
 from charms.layer import status
 from charms.reactive import (
     hook,
@@ -23,11 +23,11 @@ from elasticbeats import (
     remove_beat_on_boot,
     render_without_context,
 )
+import yaml
 
 import base64
 import os
 import time
-
 
 FILEBEAT_CONFIG = '/etc/filebeat/filebeat.yml'
 KUBE_CONFIG = '/root/.kube/config'
@@ -75,9 +75,16 @@ def render_filebeat_template():
         log(msg)
 
     # The v5 template is compatible with all versions < 6
-    major = charms.apt.get_package_version('filebeat')[0]
+    major = get_package_version('filebeat')[0]
     version = major if major.isdigit() and int(major) > 5 else "5"
     cfg_original_hash = file_hash(FILEBEAT_CONFIG)
+    # Attempt to load the extra_configs_default_input value as YAML. If this fails,
+    # replace the value with '' (which is valid YAML) so the rest of the configuration
+    # file can be rendered.
+    try:
+        yaml.safe_load(config().get('extra_configs_default_input'))
+    except yaml.YAMLError:
+        config()['extra_configs_default_input'] = ''
     connections = render_without_context(
         'filebeat-{}.yml'.format(version),
         FILEBEAT_CONFIG,
@@ -199,7 +206,7 @@ def remove_filebeat():
         os.remove(FILEBEAT_CONFIG)
     except OSError:
         pass
-    charms.apt.purge('filebeat')
+    purge('filebeat')
     remove_beat_on_boot('filebeat')
     remove_state('filebeat.autostarted')
 
