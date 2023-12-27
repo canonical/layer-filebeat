@@ -1,5 +1,8 @@
 # Overview
 
+> [!NOTE]
+> This charm is under maintainence mode. Only critical bug will be handled.
+
 Filebeat is a lightweight, open source shipper for log file data. As the
 next-generation Logstash Forwarder, Filebeat tails logs and quickly sends this
 information to Logstash for further parsing and enrichment or to Elasticsearch
