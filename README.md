@@ -1,7 +1,7 @@
 # Overview
 
 > [!NOTE]
-> This charm is under maintainence mode. Only critical bug will be handled.
+> This charm is under maintenance mode. Only critical bug will be handled.
 
 Filebeat is a lightweight, open source shipper for log file data. As the
 next-generation Logstash Forwarder, Filebeat tails logs and quickly sends this
