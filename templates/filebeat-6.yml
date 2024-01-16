@@ -17,6 +17,9 @@ filebeat:
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
+      {% if extra_configs_default_input -%}
+      {{ extra_configs_default_input|indent(6) }}
+      {% endif -%}
       fields_under_root: false
       fields:
         type: logpath-logs
