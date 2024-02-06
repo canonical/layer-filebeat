@@ -49,3 +49,20 @@ options:
     default: ""
     description: |
       A YAML list which will be injected to define additional prospectors/inputs.
+  ignore_older:
+    type: int
+    default: 0
+    description: |
+      If this option is enabled, Filebeat ignores any files that were modified before the specified timespan.
+      Configuring ignore_older can be especially useful if you keep log files for a long time. The passed 
+      values should be integers, e.g., "90", "3600", "600". The values are assumed to be in seconds
+      https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html#filebeat-input-log-ignore-older"
+  clean_inactive:
+    type: int
+    default: 0
+    description: |
+      When this option is enabled, Filebeat removes the state of a file after the specified period of inactivity has
+      elapsed. Bear in mind that if clean_inactive is enabled, it must be greater than ignore_older + scan_frequency to
+      make sure that no states are removed while a file is still being harvested. The passed values should be integers, 
+      e.g., "90", "3600", "600". The values are assumed to be in seconds:
+      https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html#filebeat-input-log-clean-inactive"
