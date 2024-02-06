@@ -27,6 +27,7 @@ from elasticbeats import (
 import base64
 import os
 import time
+import re
 
 
 FILEBEAT_CONFIG = '/etc/filebeat/filebeat.yml'
@@ -188,6 +189,92 @@ def check_filebeat_repo():
         unitdata.kv().unset('filebeat.candidate.version')
         remove_state('filebeat.reinstall')
     remove_state('filebeat.repo.changed')
+
+
+@when('apt.installed.filebeat')
+@when_any('config.changed.ignore_older', 'config.changed.clean_inactive',
+          'config.changed.scan_frequency')
+def sanity_check():
+    ignore_older = str(config().get('ignore_older'))
+    clean_inactive = str(config().get('clean_inactive'))
+    scan_frequency = str(config().get('scan_frequency'))
+
+    log("Executing sanity checks on: ignore_older = {}, \
+        clean_inactive = {}".format(ignore_older, clean_inactive))
+
+    # sanity check config strings 
+    if check_string(ignore_older) and check_string(clean_inactive):
+        log("Charm config sanity checks passed. Restarting Filebeat")
+        service("restart", "filebeat") # required?
+    else:
+        msg = "Invalid config. Sanity check(s) marked as False failed: \
+            ignore_older = {}, clean_inactive = {}".format(
+                check_string(ignore_older), check_string(clean_inactive))
+        log(msg)
+        status.blocked("Invalid config. Please check the logs for details.")
+        return
+    
+    # sanity check value compliance (e.g., ) clean_inactive must be
+    # greater than ignore_older + scan_frequency
+    scan_frequency_secs = str_to_secs(scan_frequency) if scan_frequency else 10
+    clean_inactive_secs = str_to_secs(clean_inactive)
+    ignore_older_secs = str_to_secs(ignore_older)
+
+    if clean_inactive_secs <= ignore_older_secs + scan_frequency_secs:
+        msg = "Invalid config. Make sure that the value for config \
+            'clean_inactive' is greater than 'ignore_older + scan_frequency'."
+        log(msg)
+        status.blocked("Invalid config. Please check the logs for details.")
+        return
+
+
+
+def str_to_secs(str_in):
+    """
+    Converts a time string like '8m', '99h' to seconds.
+    """
+
+    match = re.match(r'(\d+)([mh])', str_in)
+    if match:
+        value = int(match.group(1))
+        unit = match.group(2)
+        if unit == 'm':
+            return value * 60  # min to seconds
+        elif unit == 'h':
+            return value * 3600  # hours to seconds
+    else:
+        return 0
+
+def check_string(str_in):
+    """
+    [pattern] ensures only strings that contains valid integers (disallowing 
+    leading zeros) or an integer followed by one of the specified letters 
+    at the end of the string.
+    
+    Examples:
+        "123", False     # Invalid integer
+        "456h", True     # Valid integer followed by 'h'
+        "007h", False    # Invalid: Leading zero
+        "0123", False    # Invalid: Leading zero
+        "abc", False     # Invalid: Not a valid integer
+        "0h", False      # Invalid: Single digit with leading zero
+        "1h", True       # Valid: Single digit with 'h'
+        "8m", True       # Valid: Single digit with 'm'
+        "100m", True     # Valid: Integer followed by 'm'
+        "h1", False      # Invalid: Starting with letter
+        "12h34", False   # Invalid: Only one letter allowed at the end
+        "", False        # Invalid: Empty string
+        "0", True        # Valid: Single digit is allowed
+        "9999999999999999h", False  # Invalid: Exceeding maximum length
+        "12345678900m", False  # Invalid: Exceeding maximum length + 'm'
+        "1234567890h", True)     # Valid: Allowed length of 10 digits + 'h'
+    """
+
+    if not str_in:   # empty string case
+        return False
+
+    pattern = r'^(0)$|^([1-9]\d{0,9}[hm])?$'
+    return bool(re.match(pattern, str_in))
 
 
 @hook('stop')
