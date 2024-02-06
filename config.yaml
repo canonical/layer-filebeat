@@ -49,3 +49,23 @@ options:
     default: ""
     description: |
       A YAML list which will be injected to define additional prospectors/inputs.
+  ignore_older:
+    type: string
+    default: "0"
+    description: |
+      If this option is enabled, Filebeat ignores any files that were modified before the specified timespan. 
+      Configuring ignore_older can be especially useful if you keep log files for a long time:
+      https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html#filebeat-input-log-ignore-older"
+  clean_inactive:
+    type: string
+    default: "0"
+    description: |
+      When this option is enabled, Filebeat removes the state of a file after the specified period of inactivity has elapsed:
+      https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html#filebeat-input-log-clean-inactive"
+  close_timeout:
+    type: string
+    default: "0"
+    description: |
+      When this option is enabled, Filebeat gives every harvester a predefined lifetime. 
+      Regardless of where the reader is in the file, reading will stop after the close_timeout period has elapsed:
+      https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html#filebeat-input-log-close-timeout"
