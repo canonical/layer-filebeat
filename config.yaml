@@ -49,3 +49,8 @@ options:
     default: ""
     description: |
       A YAML list which will be injected to define additional prospectors/inputs.
+  extra_configs_default_input:
+    type: string
+    default: ""
+    description: |
+      A YAML list of config options to include in the default input. extra_inputs will not be affected.
