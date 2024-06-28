@@ -17,6 +17,8 @@ filebeat:
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
+      ignore_older: {{ ignore_older }}
+      clean_inactive: {{ clean_inactive }}
       fields_under_root: false
       fields:
         type: logpath-logs
@@ -39,6 +41,8 @@ filebeat:
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
+      ignore_older: {{ ignore_older }}
+      clean_inactive: {{ clean_inactive }}
       fields_under_root: false
       fields:
         type: container-logs

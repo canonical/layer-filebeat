@@ -16,6 +16,8 @@ filebeat:
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
+      ignore_older: {{ ignore_older }}
+      clean_inactive: {{ clean_inactive }}
       fields:
         juju_model_name: {{ juju_model_name }}
         juju_model_uuid: {{ juju_model_uuid }}
@@ -34,6 +36,8 @@ filebeat:
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
+      ignore_older: {{ ignore_older }}
+      clean_inactive: {{ clean_inactive }}
       fields_under_root: true
       symlinks: true
       # NB: disable json decoding; setting any of these would result in the
