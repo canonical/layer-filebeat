@@ -78,6 +78,8 @@ def render_filebeat_template():
 
     # run the sanity checks, abort the rendering if config is not valid
     if not is_config_valid():
+        status.blocked("Invalid config. Please check the logs for details.")
+        remove_state("beat.render")
         return
 
     # The v5 template is compatible with all versions < 6
@@ -197,7 +199,6 @@ def check_filebeat_repo():
     remove_state("filebeat.repo.changed")
 
 
-@when("config.changed")
 def is_config_valid() -> bool:
     """Sanity check config options.
 
@@ -218,11 +219,9 @@ def is_config_valid() -> bool:
             "Invalid config, make sure that the value for 'clean_inactive' "
             "is greater than 'ignore_older + scan_frequency'."
         )
-        status.blocked("Invalid config. Please check the logs for details.")
         return False
 
-    log("Charm config sanity checks passed. Restarting Filebeat")
-    service("restart", "filebeat")
+    log("Charm config sanity checks passed.")
     return True
 
 
