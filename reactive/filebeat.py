@@ -76,6 +76,12 @@ def render_filebeat_template():
             )
         log(msg)
 
+    # run the sanity checks, abort the rendering if config is not valid
+    if not is_config_valid():
+        status.blocked("Invalid config. Please check the logs for details.")
+        remove_state("beat.render")
+        return
+
     # The v5 template is compatible with all versions < 6
     major = charms.apt.get_package_version("filebeat")[0]
     version = major if major.isdigit() and int(major) > 5 else "5"
@@ -191,6 +197,32 @@ def check_filebeat_repo():
         unitdata.kv().unset("filebeat.candidate.version")
         remove_state("filebeat.reinstall")
     remove_state("filebeat.repo.changed")
+
+
+def is_config_valid() -> bool:
+    """Sanity check config options.
+
+    :return: True if all checks pass, False otherwise
+    """
+    log("Executing sanity checks on config values.")
+
+    # sanity check value compliance (e.g., clean_inactive must be greater
+    # than ignore_older + scan_frequency). scan_frequency is no longer a
+    # charm config option but it defaults to 10s and it's set to that in
+    # the charm templates so using that below.
+    scan_frequency = 10
+    ignore_older = config().get("ignore_older")
+    clean_inactive = config().get("clean_inactive")
+
+    if clean_inactive and clean_inactive <= ignore_older + scan_frequency:
+        log(
+            "Invalid config, make sure that the value for 'clean_inactive' "
+            "is greater than 'ignore_older + scan_frequency'."
+        )
+        return False
+
+    log("Charm config sanity checks passed.")
+    return True
 
 
 @hook("stop")
