@@ -1,0 +1,3 @@
+# NOTE: temporary change; revert once fixed in layer-basic.
+# see https://github.com/canonical/layer-basic/issues/223
+immutables<0.16;python_version < '3.8'
