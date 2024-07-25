@@ -10,10 +10,8 @@ parts:
   charm:
     source: ./
     plugin: reactive
-    build-snaps: 
-      # if it is build with charm/3.x it cannot be installed on bionic
-      # Error: pip requires Python '>=3.7' but the running Python is 3.6.9    
-      - charm/2.x/stable
+    build-snaps:
+      - charm
 
 bases:
   - build-on:
@@ -25,10 +23,20 @@ bases:
         channel: "22.04"
         architectures:
           - amd64
+  - build-on:
+    - name: ubuntu
+      channel: "20.04"
+      architectures: ["amd64"]
+    run-on:
       - name: ubuntu
         channel: "20.04"
         architectures:
           - amd64
+  - build-on:
+    - name: ubuntu
+      channel: "18.04"
+      architectures: ["amd64"]
+    run-on:
       - name: ubuntu
         channel: "18.04"
         architectures:
