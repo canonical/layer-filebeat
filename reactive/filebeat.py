@@ -3,8 +3,9 @@
 import base64
 import os
 import time
+from typing import Any
 
-import charms.apt
+import charms.apt  # pylint: disable=import-error
 from charmhelpers.core import unitdata
 from charmhelpers.core.hookenv import config, log, status_set
 from charmhelpers.core.host import (
@@ -14,10 +15,17 @@ from charmhelpers.core.host import (
     service_running,
     service_stop,
 )
-from charms.layer import status
-from charms.reactive import hook, is_state, remove_state, set_state, when, when_not
-from charms.reactive.helpers import data_changed
-from elasticbeats import (
+from charms.layer import status  # pylint: disable=import-error
+from charms.reactive import (  # pylint: disable=import-error
+    hook,
+    is_state,
+    remove_state,
+    set_state,
+    when,
+    when_not,
+)
+from charms.reactive.helpers import data_changed  # pylint: disable=import-error
+from elasticbeats import (  # pylint: disable=import-error
     enable_beat_on_boot,
     get_package_candidate,
     push_beat_index,
@@ -33,7 +41,7 @@ TLS_CLIENT_CA_PATH = "/etc/ssl/certs/filebeat-logstash.crt"
 
 
 @when_not("apt.installed.filebeat")
-def install_filebeat():
+def install_filebeat() -> None:
     """Install the payload."""
     # Our layer options will initially install filebeat, so just set a
     # message while we wait for the apt layer to do its thing.
@@ -42,11 +50,11 @@ def install_filebeat():
 
 @when("apt.installed.filebeat")
 @when("filebeat.reinstall")
-def blocked_until_reinstall():
+def blocked_until_reinstall() -> None:
     """Block until the operator handles a pending reinstall."""
     ver = unitdata.kv().get("filebeat.candidate.version", False)
     if ver:
-        msg = "Install filebeat-{} with the 'reinstall' action.".format(ver)
+        msg = f"Install filebeat-{ver} with the 'reinstall' action."
         status.blocked(msg)
 
 
@@ -58,7 +66,7 @@ def blocked_until_reinstall():
         LOGSTASH_SSL_KEY: ["filebeat"],
     }
 )
-def render_filebeat_template():
+def render_filebeat_template() -> None:
     """Create the filebeat.yaml config file.
 
     Renders the appropriate template for the major version of filebeat that
@@ -71,8 +79,8 @@ def render_filebeat_template():
             msg = "Collecting k8s metadata."
         else:
             msg = (
-                "kube_logs=True, but {} does not exist. "
-                "No k8s metadata will be collected.".format(KUBE_CONFIG)
+                f"kube_logs=True, but {KUBE_CONFIG} does not exist. "
+                "No k8s metadata will be collected."
             )
         log(msg)
 
@@ -87,7 +95,7 @@ def render_filebeat_template():
     version = major if major.isdigit() and int(major) > 5 else "5"
     cfg_original_hash = file_hash(FILEBEAT_CONFIG)
     connections = render_without_context(
-        "filebeat-{}.yml".format(version),
+        f"filebeat-{version}.yml",
         FILEBEAT_CONFIG,
         {"logstash_ssl_cert": is_state("certificates.available")},
     )
@@ -106,7 +114,7 @@ def render_filebeat_template():
         service("stop", "filebeat")
 
 
-def manage_filebeat_logstash_ssl():
+def manage_filebeat_logstash_ssl() -> None:
     """Manage the ssl cert/key that filebeat uses to connect to logstash.
 
     Create the cert/key files when both logstash_ssl options have been set;
@@ -138,7 +146,7 @@ def manage_filebeat_logstash_ssl():
 
 @when("apt.installed.filebeat")
 @when_not("filebeat.autostarted")
-def enlist_filebeat():
+def enlist_filebeat() -> None:
     """Enable the Filebeat service."""
     enable_beat_on_boot("filebeat")
     set_state("filebeat.autostarted")
@@ -147,7 +155,7 @@ def enlist_filebeat():
 @when("apt.installed.filebeat")
 @when("elasticsearch.available")
 @when_not("filebeat.index.pushed")
-def push_filebeat_index(elasticsearch):
+def push_filebeat_index(elasticsearch: Any) -> None:
     """Create the Filebeat index in Elasticsearch.
 
     Once elasticsearch is available, make 5 attempts to create a filebeat
@@ -158,7 +166,7 @@ def push_filebeat_index(elasticsearch):
     """
     hosts = elasticsearch.list_unit_data()
     for host in hosts:
-        host_string = "{}:{}".format(host["host"], host["port"])
+        host_string = f'{host["host"]}:{host["port"]}'
 
     max_attempts = 5
     for i in range(1, max_attempts):
@@ -166,17 +174,17 @@ def push_filebeat_index(elasticsearch):
             set_state("filebeat.index.pushed")
             status.active("Filebeat ready.")
             break
-        msg = "Attempt {} to push filebeat index failed (retrying)".format(i)
+        msg = f"Attempt {i} to push filebeat index failed (retrying)"
         status.waiting(msg)
         time.sleep(i * 30)  # back off 30s for each attempt
     else:
-        msg = "Failed to push filebeat index to http://{}".format(host_string)
+        msg = f"Failed to push filebeat index to http://{host_string}"
         status.blocked(msg)
 
 
 @when("apt.installed.filebeat")
 @when("config.changed.install_sources")
-def change_filebeat_repo():
+def change_filebeat_repo() -> None:
     """Set a flag when the apt repo changes."""
     # NB: we can't check for new versions yet because we cannot be sure that
     # the apt update has completed. Set status and a flag to check later.
@@ -187,7 +195,7 @@ def change_filebeat_repo():
 @when("apt.installed.filebeat")
 @when("filebeat.repo.changed")
 @when_not("apt.needs_update")
-def check_filebeat_repo():
+def check_filebeat_repo() -> None:
     """Check the apt repo for filebeat changes."""
     ver = get_package_candidate("filebeat")
     if ver:
@@ -226,7 +234,7 @@ def is_config_valid() -> bool:
 
 
 @hook("stop")
-def remove_filebeat():
+def remove_filebeat() -> None:
     """Stop, purge, and remove all traces of filebeat."""
     status.maint("Removing filebeat.")
     service_stop("filebeat")
@@ -240,7 +248,7 @@ def remove_filebeat():
 
 
 @hook("update-status")
-def update_status():
+def update_status() -> None:
     """Handle update-status hook."""
     log("Updating status.")
 
