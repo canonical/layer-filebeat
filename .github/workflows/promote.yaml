@@ -17,9 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Release charm to channel
-        uses: canonical/charming-actions/release-charm@2.4.0
+        uses: canonical/charming-actions/release-charm@2.7.0
         with:
           credentials: ${{ secrets.CHARMHUB_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           destination-channel: ${{ github.event.inputs.destination-channel }}
           origin-channel: ${{ github.event.inputs.origin-channel }}
+          charmcraft-channel: "2.x/stable"
